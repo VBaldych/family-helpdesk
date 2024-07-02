@@ -26,6 +26,10 @@ class Comment
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'comments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Issue $issue = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +79,18 @@ class Comment
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getIssue(): ?Issue
+    {
+        return $this->issue;
+    }
+
+    public function setIssue(?Issue $issue): static
+    {
+        $this->issue = $issue;
 
         return $this;
     }
