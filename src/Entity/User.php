@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -25,6 +27,17 @@ class User
 
     #[ORM\Column(length: 255)]
     private ?string $nickName = null;
+
+    /**
+     * @var Collection<int, Issue>
+     */
+    #[ORM\OneToMany(targetEntity: Issue::class, mappedBy: 'createdBy', orphanRemoval: true)]
+    private Collection $issues;
+
+    public function __construct()
+    {
+        $this->issues = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -82,6 +95,36 @@ class User
     public function setNickName(string $nickName): static
     {
         $this->nickName = $nickName;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Issue>
+     */
+    public function getIssues(): Collection
+    {
+        return $this->issues;
+    }
+
+    public function addIssue(Issue $issue): static
+    {
+        if (!$this->issues->contains($issue)) {
+            $this->issues->add($issue);
+            $issue->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIssue(Issue $issue): static
+    {
+        if ($this->issues->removeElement($issue)) {
+            // set the owning side to null (unless already changed)
+            if ($issue->getCreatedBy() === $this) {
+                $issue->setCreatedBy(null);
+            }
+        }
 
         return $this;
     }
