@@ -25,7 +25,6 @@ class IssueCrudController extends AbstractCrudController
 
     public function configureFilters(Filters $filters): Filters
     {
-        return $filters
-            ->add(EntityFilter::new('user'));
+        return $filters->add(EntityFilter::new('user', 'Created by'));
     }
 }
