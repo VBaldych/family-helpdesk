@@ -22,10 +22,6 @@ class Issue
     #[ORM\Column(type: Types::TEXT)]
     private ?string $Description = null;
 
-    #[ORM\ManyToOne(inversedBy: 'issues')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $createdBy = null;
-
     /**
      * @var Collection<int, Comment>
      */
@@ -62,18 +58,6 @@ class Issue
     public function setDescription(string $Description): static
     {
         $this->Description = $Description;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?User
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(?User $createdBy): static
-    {
-        $this->createdBy = $createdBy;
 
         return $this;
     }
