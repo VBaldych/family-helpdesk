@@ -28,6 +28,9 @@ class Issue
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'issue', orphanRemoval: true)]
     private Collection $comments;
 
+    #[ORM\Column(length: 255)]
+    private ?string $priority = null;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
@@ -88,6 +91,18 @@ class Issue
                 $comment->setIssue(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPriority(): ?string
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(string $priority): static
+    {
+        $this->priority = $priority;
 
         return $this;
     }
