@@ -11,6 +11,10 @@ Then run commands in a CLI:
 1. symfony server:start -d && docker-compose up -d
 2. symfony console doctrine:migrations:migrate
 
+Admin credentials:
+Login - admin
+Password - admin
+
 # Want to help contribute?
 Be sure to check out our repository with development tools on
 <a target="_blank" href="https://github.com/VBaldych/home_helpdesk/">
