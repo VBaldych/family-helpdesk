@@ -12,11 +12,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DashboardController extends AbstractDashboardController
 {
+    public function __construct(private AdminUrlGenerator $adminUrlGenerator) {}
+
     #[Route('/', name: 'homepage')]
     public function index(): Response
     {
-        $routeBuilder = $this->container->get(AdminUrlGenerator::class);
-        $url = $routeBuilder->setController(IssueCrudController::class)->generateUrl();
+        $url = $this->adminUrlGenerator
+            ->setController(IssueCrudController::class)
+            ->generateUrl();
 
         return $this->redirect($url);
     }
