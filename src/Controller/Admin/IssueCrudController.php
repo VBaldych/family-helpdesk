@@ -38,6 +38,7 @@ class IssueCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable {
         $adminUrlGenerator = $this->adminUrlGenerator;
+        $current_user_id = $this->getUser()->getUserIdentifier();
 
         yield TextField::new('title')
             ->formatValue(function ($value, $entity) use ($adminUrlGenerator) {
@@ -50,6 +51,7 @@ class IssueCrudController extends AbstractCrudController
                 return sprintf('<a href="%s">%s</a>', $url, $value);
             });
 
+        yield TextField::new('author')->setValue($current_user_id)->onlyOnIndex();
         yield TextareaField::new('description');
         yield ChoiceField::new('priority')->setChoices([
             'Low' => 'priority_low',
@@ -59,5 +61,12 @@ class IssueCrudController extends AbstractCrudController
         ])->renderExpanded();
     }
 
+    public function createEntity(string $entityFqcn): Issue
+    {
+        $issue = new Issue();
+        $current_user_id = $this->getUser();
+        $issue->setAuthor($current_user_id);
 
+        return $issue;
+    }
 }
