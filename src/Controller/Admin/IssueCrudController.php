@@ -10,9 +10,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 class IssueCrudController extends AbstractCrudController
 {
+    public function __construct(private AdminUrlGenerator $adminUrlGenerator)
+    {
+    }
+
     public static function getEntityFqcn(): string
     {
         return Issue::class;
@@ -32,7 +37,19 @@ class IssueCrudController extends AbstractCrudController
     }
 
     public function configureFields(string $pageName): iterable {
-        yield TextField::new('title');
+        $adminUrlGenerator = $this->adminUrlGenerator;
+
+        yield TextField::new('title')
+            ->formatValue(function ($value, $entity) use ($adminUrlGenerator) {
+                $url = $adminUrlGenerator
+                    ->setController(self::class)
+                    ->setAction('detail')
+                    ->setEntityId($entity->getId())
+                    ->generateUrl();
+
+                return sprintf('<a href="%s">%s</a>', $url, $value);
+            });
+
         yield TextareaField::new('description');
         yield ChoiceField::new('priority')->setChoices([
             'Low' => 'priority_low',
@@ -41,4 +58,6 @@ class IssueCrudController extends AbstractCrudController
             'Critical' => 'priority_critical',
         ])->renderExpanded();
     }
+
+
 }
