@@ -31,6 +31,10 @@ class Issue
     #[ORM\Column(length: 255)]
     private ?string $priority = null;
 
+    #[ORM\ManyToOne(inversedBy: 'issues')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $author = null;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
@@ -103,6 +107,18 @@ class Issue
     public function setPriority(string $priority): static
     {
         $this->priority = $priority;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }

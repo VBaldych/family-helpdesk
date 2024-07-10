@@ -31,7 +31,7 @@ class User
     /**
      * @var Collection<int, Issue>
      */
-    #[ORM\OneToMany(targetEntity: Issue::class, mappedBy: 'createdBy', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Issue::class, mappedBy: 'author', orphanRemoval: true)]
     private Collection $issues;
 
     public function __construct()
@@ -111,7 +111,7 @@ class User
     {
         if (!$this->issues->contains($issue)) {
             $this->issues->add($issue);
-            $issue->setCreatedBy($this);
+            $issue->setAuthor($this);
         }
 
         return $this;
@@ -121,8 +121,8 @@ class User
     {
         if ($this->issues->removeElement($issue)) {
             // set the owning side to null (unless already changed)
-            if ($issue->getCreatedBy() === $this) {
-                $issue->setCreatedBy(null);
+            if ($issue->getAuthor() === $this) {
+                $issue->setAuthor(null);
             }
         }
 
