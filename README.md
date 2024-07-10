@@ -9,7 +9,7 @@ promptly and thoroughly.
 Be ensure that [Symfony](https://symfony.com/download) and [Docker](https://www.docker.com/products/docker-desktop/) are installed on your local machine
 Then run commands in a CLI:
 1. symfony server:start -d && docker-compose up -d
-2. symfony doctrine:migrations:migrate
+2. symfony console doctrine:migrations:migrate
 
 # Want to help contribute?
 Be sure to check out our repository with development tools on
