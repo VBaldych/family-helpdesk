@@ -31,10 +31,7 @@ class IssueCrudController extends AbstractCrudController
             ->setSearchFields(['author', 'text', 'email']);
     }
 
-    public function configureFilters(Filters $filters): Filters
-    {
-        return $filters->add(EntityFilter::new('user', 'Created by'));
-    }
+    // @todo: Add configureFilters method implementation.
 
     public function configureFields(string $pageName): iterable {
         $adminUrlGenerator = $this->adminUrlGenerator;
