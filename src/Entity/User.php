@@ -46,6 +46,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->issues = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return self::getUserIdentifier();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

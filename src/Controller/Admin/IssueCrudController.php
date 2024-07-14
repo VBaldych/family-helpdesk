@@ -4,12 +4,10 @@ namespace App\Controller\Admin;
 
 use App\Entity\Issue;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 class IssueCrudController extends AbstractCrudController
@@ -35,7 +33,6 @@ class IssueCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable {
         $adminUrlGenerator = $this->adminUrlGenerator;
-        $current_user_id = $this->getUser()->getUserIdentifier();
 
         yield TextField::new('title')
             ->formatValue(function ($value, $entity) use ($adminUrlGenerator) {
@@ -48,7 +45,7 @@ class IssueCrudController extends AbstractCrudController
                 return sprintf('<a href="%s">%s</a>', $url, $value);
             });
 
-        yield TextField::new('author')->setValue($current_user_id)->onlyOnIndex();
+        yield TextField::new('author')->onlyOnIndex();
         yield TextareaField::new('description');
         yield ChoiceField::new('priority')->setChoices([
             'Low' => 'priority_low',
