@@ -14,7 +14,7 @@ class DashboardController extends AbstractDashboardController
 {
     public function __construct(private AdminUrlGenerator $adminUrlGenerator) {}
 
-    #[Route('/', name: 'homepage')]
+    #[Route('/admin', name: 'user_homepage')]
     public function index(): Response
     {
         $url = $this->adminUrlGenerator
