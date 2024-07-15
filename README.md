@@ -5,6 +5,8 @@ Welcome to our Family Helpdesk, centralized hub for managing and resolving suppo
 Our Helpdesk System is designed to streamline customer support operations, ensuring that every query is addressed]
 promptly and thoroughly.
 
+Old issues (>30 days) will be deleted automatically from DB.
+
 # Local installation
 Be ensure that [Symfony](https://symfony.com/download) and [Docker](https://www.docker.com/products/docker-desktop/) are installed on your local machine
 Then run commands in a CLI:
