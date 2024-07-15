@@ -5,8 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Comment;
 use App\Entity\Issue;
 use App\Form\CommentFormType;
+use App\Message\CommentMessage;
 use App\Repository\CommentRepository;
-use App\Service\SpamChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -16,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class IssueCrudController extends AbstractCrudController
 {
@@ -23,7 +24,7 @@ class IssueCrudController extends AbstractCrudController
         private AdminUrlGenerator      $adminUrlGenerator,
         private EntityManagerInterface $entityManager,
         private CommentRepository      $commentRepository,
-        private SpamChecker            $spamChecker
+        private MessageBusInterface    $bus,
     )
     {
     }
@@ -91,6 +92,7 @@ class IssueCrudController extends AbstractCrudController
             $comment->setIssue($issue_entity);
 
             $this->entityManager->persist($comment);
+            $this->entityManager->flush();
 
             $spam_context = [
                 'user_ip' => $request->getClientIp(),
@@ -98,11 +100,8 @@ class IssueCrudController extends AbstractCrudController
                 'referrer' => $request->headers->get('referer'),
                 'permalink' => $request->getUri(),
             ];
-            if (2 === $this->spamChecker->getSpamScore($comment, $spam_context)) {
-                throw new \RuntimeException('Blatant spam, go away!');
-            }
 
-            $this->entityManager->flush();
+            $this->bus->dispatch(new CommentMessage($comment->getId(), $spam_context));
 
             return $this->redirectToRoute('user_homepage', [
                 'crudAction' => 'detail',
