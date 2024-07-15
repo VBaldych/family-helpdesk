@@ -16,6 +16,9 @@ Admin credentials:
 Login - admin@gmail.com
 Password - admin
 
+To run mailcatcher service run the command:
+symfony open:local:webmail
+
 # Want to help contribute?
 Be sure to check out our repository with development tools on
 <a target="_blank" href="https://github.com/VBaldych/home_helpdesk/">

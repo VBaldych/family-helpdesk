@@ -7,20 +7,26 @@ use App\Repository\CommentRepository;
 use App\Service\SpamChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Bridge\Twig\Mime\NotificationEmail;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 #[AsMessageHandler]
 class CommentMessageHandler
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private SpamChecker            $spamChecker,
-        private CommentRepository      $commentRepository,
-        private MessageBusInterface    $bus,
-        private WorkflowInterface      $commentStateMachine,
-        private ?LoggerInterface       $logger = null,
+        private EntityManagerInterface              $entityManager,
+        private SpamChecker                         $spamChecker,
+        private CommentRepository                   $commentRepository,
+        private MessageBusInterface                 $bus,
+        private WorkflowInterface                   $commentStateMachine,
+        private ?LoggerInterface                    $logger = null,
+        private MailerInterface                     $mailer,
+        #[Autowire('%admin_email%')] private string $adminEmail,
     )
     {
     }
@@ -48,13 +54,23 @@ class CommentMessageHandler
             $this->commentStateMachine->can($comment, 'publish')
             || $this->commentStateMachine->can($comment, 'publish_ham')
         ) {
-            $this->commentStateMachine->apply($comment, $this->commentStateMachine->can($comment, 'publish') ? 'publish' : 'publish_ham');
-            $this->entityManager->flush();
+            $this->sendEmail($this->adminEmail, $this->adminEmail, ['comment' => $comment]);
         } elseif ($this->logger) {
             $this->logger->debug('Dropping comment message', [
                 'comment' => $comment->getId(),
                 'state' => $comment->getState()
             ]);
         }
+    }
+
+    public function sendEmail(string $from, string $to, array $context)
+    {
+        $email = (new NotificationEmail())->subject('New comment posted')
+            ->htmlTemplate('emails/comment_notification.html.twig')
+            ->from($from)
+            ->to($to)
+            ->context($context);
+
+        $this->mailer->send($email);
     }
 }
