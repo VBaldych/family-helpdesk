@@ -7,26 +7,20 @@ use App\Entity\Issue;
 use App\Form\CommentFormType;
 use App\Message\CommentMessage;
 use App\Repository\CommentRepository;
-use App\Service\SpamChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Bridge\Twig\Mime\NotificationEmail;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Workflow\WorkflowInterface;
 
 class IssueCrudController extends AbstractCrudController
 {
@@ -35,8 +29,6 @@ class IssueCrudController extends AbstractCrudController
         private EntityManagerInterface $entityManager,
         private CommentRepository      $commentRepository,
         private MessageBusInterface    $bus,
-        private MailerInterface                     $mailer,
-        #[Autowire('%admin_email%')] private string $adminEmail,
     )
     {
     }
@@ -73,6 +65,7 @@ class IssueCrudController extends AbstractCrudController
 
         yield TextField::new('author')->onlyOnIndex();
         yield TextareaField::new('description');
+        yield DateTimeField::new('created_at')->onlyOnIndex();
         yield ChoiceField::new('priority')->setChoices([
             'Low' => 'priority_low',
             'Medium' => 'priority_medium',

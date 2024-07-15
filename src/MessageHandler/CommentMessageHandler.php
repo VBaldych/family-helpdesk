@@ -12,7 +12,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 #[AsMessageHandler]
