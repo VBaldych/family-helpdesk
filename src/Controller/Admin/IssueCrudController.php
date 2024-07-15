@@ -2,9 +2,15 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Comment;
 use App\Entity\Issue;
+use App\Form\CommentFormType;
+use App\Repository\CommentRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -12,7 +18,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 class IssueCrudController extends AbstractCrudController
 {
-    public function __construct(private AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(
+        private AdminUrlGenerator $adminUrlGenerator,
+        private EntityManagerInterface $entityManager,
+        private CommentRepository $commentRepository
+    )
     {
     }
 
@@ -62,5 +72,39 @@ class IssueCrudController extends AbstractCrudController
         $issue->setAuthor($current_user_id);
 
         return $issue;
+    }
+
+    public function detail(AdminContext $context)
+    {
+        $request = $context->getRequest();
+        $issue_dto = $context->getEntity();
+        $issue_entity = $issue_dto->getInstance();
+
+        $comment = new Comment();
+        $form = $this->createForm(CommentFormType::class, $comment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setIssue($issue_entity);
+
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('user_homepage', [
+                'crudAction' => 'detail',
+                'crudControllerFqcn' => self::class,
+                'entityId' => $issue_entity->getId(),
+            ]);
+        }
+
+        $this->container->get(EntityFactory::class)->processActions($issue_dto, $context->getCrud()->getActionsConfig());
+
+        return $this->render('admin/issue_detail.html.twig', [
+            'pageName' => Crud::PAGE_DETAIL,
+            'entity' => $issue_entity,
+            'actions' => $issue_dto->getActions(),
+            'comments' => $this->commentRepository->findBy(['issue' => $issue_entity]),
+            'commentForm' => $form,
+        ]);
     }
 }

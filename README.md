@@ -9,10 +9,11 @@ promptly and thoroughly.
 Be ensure that [Symfony](https://symfony.com/download) and [Docker](https://www.docker.com/products/docker-desktop/) are installed on your local machine
 Then run commands in a CLI:
 1. symfony server:start -d && docker-compose up -d
-2. symfony console doctrine:migrations:migrate
+2. symfony console doctrine:database:create
+3. symfony console doctrine:migrations:migrate
 
 Admin credentials:
-Login - admin
+Login - admin@gmail.com
 Password - admin
 
 # Want to help contribute?
