@@ -6,6 +6,7 @@ use App\Entity\Comment;
 use App\Entity\Issue;
 use App\Form\CommentFormType;
 use App\Repository\CommentRepository;
+use App\Service\SpamChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -19,9 +20,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 class IssueCrudController extends AbstractCrudController
 {
     public function __construct(
-        private AdminUrlGenerator $adminUrlGenerator,
+        private AdminUrlGenerator      $adminUrlGenerator,
         private EntityManagerInterface $entityManager,
-        private CommentRepository $commentRepository
+        private CommentRepository      $commentRepository,
+        private SpamChecker            $spamChecker
     )
     {
     }
@@ -41,7 +43,8 @@ class IssueCrudController extends AbstractCrudController
 
     // @todo: Add configureFilters method implementation.
 
-    public function configureFields(string $pageName): iterable {
+    public function configureFields(string $pageName): iterable
+    {
         $adminUrlGenerator = $this->adminUrlGenerator;
 
         yield TextField::new('title')
@@ -88,6 +91,17 @@ class IssueCrudController extends AbstractCrudController
             $comment->setIssue($issue_entity);
 
             $this->entityManager->persist($comment);
+
+            $spam_context = [
+                'user_ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('user-agent'),
+                'referrer' => $request->headers->get('referer'),
+                'permalink' => $request->getUri(),
+            ];
+            if (2 === $this->spamChecker->getSpamScore($comment, $spam_context)) {
+                throw new \RuntimeException('Blatant spam, go away!');
+            }
+
             $this->entityManager->flush();
 
             return $this->redirectToRoute('user_homepage', [
