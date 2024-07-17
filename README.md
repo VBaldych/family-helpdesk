@@ -25,9 +25,3 @@ symfony open:local:webmail
 Be sure to check out our repository with development tools on
 <a target="_blank" href="https://github.com/VBaldych/home_helpdesk/">
 Github</a>
-
-## GitHub actions
-We use github actions to trigger
-1. PHPStan for static analysis of the code being contributed
-2. PHPCS for coding standards of the code being contributed
-3. PHPUnit for our unit tests instead of running it in Travis CI
