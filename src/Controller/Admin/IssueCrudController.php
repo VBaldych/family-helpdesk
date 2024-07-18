@@ -21,6 +21,8 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Notifier\Notification\Notification;
+use Symfony\Component\Notifier\NotifierInterface;
 
 class IssueCrudController extends AbstractCrudController
 {
@@ -29,6 +31,7 @@ class IssueCrudController extends AbstractCrudController
         private EntityManagerInterface $entityManager,
         private CommentRepository      $commentRepository,
         private MessageBusInterface    $bus,
+        private NotifierInterface      $notifier,
     )
     {
     }
@@ -67,10 +70,10 @@ class IssueCrudController extends AbstractCrudController
         yield TextareaField::new('description');
         yield DateTimeField::new('created_at')->onlyOnIndex();
         yield ChoiceField::new('priority')->setChoices([
-            'Low' => 'priority_low',
-            'Medium' => 'priority_medium',
-            'High' => 'priority_high',
-            'Critical' => 'priority_critical',
+            'Low' => 'Low',
+            'Medium' => 'Medium',
+            'High' => 'High',
+            'Critical' => 'Medium',
         ])->renderExpanded();
     }
 
@@ -112,12 +115,17 @@ class IssueCrudController extends AbstractCrudController
             ];
 
             $this->bus->dispatch(new CommentMessage($comment->getId(), $spam_context));
+            $this->notifier->send(new Notification('Comment left!', ['browser']));
 
             return $this->redirectToRoute('user_homepage', [
                 'crudAction' => 'detail',
                 'crudControllerFqcn' => self::class,
                 'entityId' => $issue_entity->getId(),
             ]);
+        }
+
+        if ($form->isSubmitted()) {
+            $this->notifier->send(new Notification('Can you check your submission? There are some problems with it.', ['browser']));
         }
 
         $this->container->get(EntityFactory::class)->processActions($issue_dto, $context->getCrud()->getActionsConfig());

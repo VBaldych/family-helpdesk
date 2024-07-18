@@ -15,6 +15,14 @@
 {% endblock %}
 
 {% block main %}
+    {% for message in app.flashes('notification') %}
+        <div class="alert alert-info alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+
     <p><span>Description: </span>{{ entity.description }}</p>
     <p><span>Priority: </span>{{ entity.priority }}</p>
 
